@@ -58,9 +58,6 @@ CREATE UNIQUE INDEX "two_factor_topt_user_id_key" ON "two_factor_topt"("user_id"
 CREATE UNIQUE INDEX "backup_code_hash_key" ON "backup_code"("hash");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "backup_code_user_id_key" ON "backup_code"("user_id");
-
--- CreateIndex
 CREATE INDEX "backup_code_hash_idx" ON "backup_code"("hash");
 
 -- AddForeignKey

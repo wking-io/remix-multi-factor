@@ -69,7 +69,7 @@ function SignInPage({ globalError }: { globalError?: string }) {
       </div>
       <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
         {globalError ? (
-          <div className="bg-danger-100 text-danger-700 rounded-md py-2 px-3 text-sm">
+          <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
             {globalError}
           </div>
         ) : null}

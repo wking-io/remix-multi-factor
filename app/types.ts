@@ -13,3 +13,14 @@ export type PropsWithClassName<T = {}> = { className?: string } & T;
  * ex: <Container as="main"></Container>
  **/
 export type Tag = ElementType | ComponentType<{ className?: string }>;
+
+export type UserSession =
+  | {
+      kind: "basic";
+      userId: string;
+    }
+  | {
+      kind: "totp";
+      authenticated: boolean;
+      userId: string;
+    };

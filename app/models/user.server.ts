@@ -1,11 +1,10 @@
 import type { Prisma, User as UserSchema } from "@prisma/client";
-
 import bcrypt from "bcryptjs";
 import { AuthorizationError } from "remix-auth";
 import isAlpha from "validator/lib/isAlpha";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import { z } from "zod";
-import { prisma } from "~/db.server";
+import { prisma } from "~/services/db.server";
 
 export type User = Pick<UserSchema, "email" | "firstName" | "id">;
 
@@ -103,26 +102,53 @@ export async function verifyLogin({
   };
 }
 
-export async function getUserByEmail(email: User["email"]) {
-  return prisma.user.findUnique({
+export async function getUserByEmail(
+  email: User["email"]
+): Promise<User | null> {
+  const maybeUser = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true, firstName: true },
+    select: userSelect,
   });
+
+  if (!maybeUser) return null;
+  return payloadToUser(maybeUser);
 }
 
 const userSelect = {
   id: true,
   email: true,
+  firstName: true,
 } satisfies Prisma.UserSelect;
 
 function payloadToUser({
   ...user
-}: Prisma.UserGetPayload<{ select: typeof userSelect }>) {
+}: Prisma.UserGetPayload<{ select: typeof userSelect }>): User {
   return { ...user };
 }
 
-export async function getUserById(id: User["id"]) {
+export async function getUserById(id: User["id"]): Promise<User> {
   return payloadToUser(
     await prisma.user.findUniqueOrThrow({ where: { id }, select: userSelect })
   );
+}
+
+/**
+ * TOTP
+ */
+export async function saveTOTP({
+  userId,
+  secret,
+}: {
+  userId: User["id"];
+  secret: string;
+}) {
+  return prisma.twoFactorTopt.create({
+    data: { secret, user: { connect: { id: userId } } },
+  });
+}
+
+export async function getTOTP(userId: User["id"]) {
+  return prisma.twoFactorTopt.findUnique({
+    where: { userId },
+  });
 }

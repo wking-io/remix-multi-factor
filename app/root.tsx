@@ -14,10 +14,14 @@ import { getSession, sessionStorage } from "~/services/session.server";
 import { getEnv } from "~/utils/env";
 import { invariant } from "~/utils/invariant";
 import { getDomainUrl } from "~/utils/misc.server";
+import { maybeUser } from "./services/auth.server";
 import stylesheetUrl from "./styles/app.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesheetUrl }, { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" }];
+  return [
+    { rel: "stylesheet", href: stylesheetUrl },
+    { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" },
+  ];
 };
 
 export async function loader({ request }: LoaderArgs) {
@@ -25,6 +29,7 @@ export async function loader({ request }: LoaderArgs) {
   const token = createAuthenticityToken(session, "_csrf");
   return json(
     {
+      user: await maybeUser(request),
       csrf: token,
       ENV: getEnv(),
       requestInfo: {

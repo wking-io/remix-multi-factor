@@ -58,7 +58,7 @@ model BackupCode {
   usedAt DateTime?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique @map("user_id")
+  userId String @map("user_id")
 
   @@index(hash)
   @@map("backup_code")
