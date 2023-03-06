@@ -1,36 +1,37 @@
-import type { ComponentPropsWithRef } from "react"
-import Action from "~/components/impl/Action"
+import type { ComponentPropsWithRef } from "react";
+import Action from "~/components/impl/Action";
 
 type Variant = {
-	variant?: keyof typeof variants
-}
+  variant?: keyof typeof variants;
+};
 
 const variants = {
-	primary:
-		"border-transparent text-white bg-brand hover:bg-brand-dark focus:ring-brand-500/50 hover:shadow-lg",
-	secondary:
-		"border-transparent text-white bg-brand-dark hover:bg-brand focus:ring-brand/50 hover:shadow-lg",
-	danger:
-		"border-transparent text-white bg-danger hover:bg-danger-hover focus:ring-danger/50",
-	ghost:
-		"border-transparent bg-brand-light/30 text-brand hover:bg-brand-light/40",
-} as const
+  orange: {
+    wrapper: "border-orange-900 bg-orange-600 hover:bg-orange-800",
+    body: "bg-orange-400 text-white",
+  },
+} as const;
 
 const baseClasses =
-	"flex items-center gap-2 font-display font-semibold inline-flex justify-center items-center px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 select-none disabled:bg-opacity-60 disabled:pointer-events-none transition"
+  "rounded-[10px] border-[3px] pb-1 transition-all hover:pb-0 hover:pt-1";
 
 export default function Button({
-	children,
-	variant = "primary",
-	className,
-	...props
+  children,
+  variant = "orange",
+  className,
+  ...props
 }: ComponentPropsWithRef<typeof Action> & Variant) {
-	return (
-		<Action
-			{...props}
-			className={`${baseClasses} ${variants[variant]} ${className ?? ""}`}
-		>
-			{children}
-		</Action>
-	)
+  const { wrapper, body } = variants[variant];
+  return (
+    <Action
+      {...props}
+      className={`${baseClasses} ${wrapper} ${className ?? ""}`}
+    >
+      <div
+        className={`${body} flex items-center rounded-lg py-2 px-4 text-sm font-bold`}
+      >
+        {children}
+      </div>
+    </Action>
+  );
 }

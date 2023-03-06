@@ -123,3 +123,24 @@ export function BellIcon(props: ComponentPropsWithoutRef<"svg">) {
     </svg>
   );
 }
+
+export function ChevronIcon(props: ComponentPropsWithoutRef<"svg">) {
+  return (
+    <svg
+      width="11"
+      height="16"
+      viewBox="0 0 11 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M2.57138 14.8572C5.04355 12.8317 6.49936 11.4557 8.24112 9.42647C8.94534 8.606 8.94534 7.39407 8.24112 6.5736C6.49937 4.54438 5.04355 3.16838 2.57138 1.14289"
+        className="stroke-current"
+        stroke-width="3.42857"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
