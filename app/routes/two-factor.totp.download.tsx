@@ -6,7 +6,7 @@ export default function TwoFactorTOTPDownload() {
     <div>
       <p>Download the app please!</p>
       <Form action="/two-factor/totp" method="delete">
-        <Button variant="ghost">Cancel</Button>
+        <Button>Cancel</Button>
       </Form>
       <Button to="/two-factor/totp/setup">Next: Setup</Button>
     </div>

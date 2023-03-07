@@ -120,7 +120,6 @@ function Base({ flash }: { flash?: TKeyedFlash }) {
               <Button
                 formAction="/two-factor/totp"
                 formMethod="delete"
-                variant="ghost"
                 className="w-full"
               >
                 Cancel

@@ -137,9 +137,7 @@ function Base({ children }: PropsWithChildren<{}>) {
             Next: Confirm
           </Button>
           <Form action="/two-factor/totp" method="delete" className="w-full">
-            <Button variant="ghost" className="w-full">
-              Cancel
-            </Button>
+            <Button className="w-full">Cancel</Button>
           </Form>
         </div>
       </Container>
