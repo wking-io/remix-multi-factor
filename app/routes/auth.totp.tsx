@@ -9,7 +9,7 @@ import { Text } from "~/components/kits/Text";
 import Container from "~/components/layout/Container";
 import { getTOTP } from "~/models/user.server";
 import { requireUserId, setUserSession } from "~/services/auth.server";
-import { sessionStorage } from "~/services/session.server";
+import { sessionStore } from "~/services/session.server";
 import { invariant } from "~/utils/invariant";
 import { safeRedirect } from "~/utils/misc.server";
 
@@ -58,7 +58,7 @@ export async function action({ request }: ActionArgs) {
 
     return redirect(redirectTo, {
       headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
+        "Set-Cookie": await sessionStore.commitSession(session),
       },
     });
   } catch (e) {

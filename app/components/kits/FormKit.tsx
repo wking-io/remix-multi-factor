@@ -149,11 +149,12 @@ FieldInfo.displayName = "FormKit.FieldInfo";
 
 export const Input = forwardRef<
   HTMLInputElement,
-  ComponentPropsWithRef<"input"> & { colors?: string }
+  ComponentPropsWithRef<"input"> & { colors?: string; inputClassName?: string }
 >(
   (
     {
       className,
+      inputClassName = "",
       colors = "border-emerald-900 bg-emerald-200 text-emerald-900",
       ...props
     },
@@ -165,7 +166,7 @@ export const Input = forwardRef<
       >
         <input
           ref={ref}
-          className={`w-full rounded-lg border-0 bg-white`}
+          className={`${inputClassName} w-full rounded-lg border-0 bg-white`}
           {...props}
         />
       </div>

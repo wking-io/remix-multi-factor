@@ -9,7 +9,7 @@ import {
   VerifyLogin,
   verifyLogin,
 } from "~/models/user.server";
-import { getSession, sessionStorage } from "~/services/session.server";
+import { getSession, sessionStore } from "~/services/session.server";
 import { UserSession } from "~/types";
 import { getEnvOrThrow } from "~/utils/env";
 
@@ -17,7 +17,7 @@ const USER_SESSION_KEY = "userId";
 
 // Create an instance of the authenticator.
 // Pass the object type we are storing.
-export let authenticator = new Authenticator<UserSession>(sessionStorage, {
+export let authenticator = new Authenticator<UserSession>(sessionStore, {
   sessionKey: USER_SESSION_KEY,
 });
 

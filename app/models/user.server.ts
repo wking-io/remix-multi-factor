@@ -142,9 +142,20 @@ export async function saveTOTP({
   userId: User["id"];
   secret: string;
 }) {
-  return prisma.twoFactorTopt.create({
-    data: { secret, user: { connect: { id: userId } } },
-  });
+  return Promise.all([
+    prisma.twoFactorTopt.create({
+      data: { secret, user: { connect: { id: userId } } },
+    }),
+    prisma.twoFactor.create({
+      data: {
+        isDefault: true,
+        method: "totp",
+        user: {
+          connect: { id: userId },
+        },
+      },
+    }),
+  ]);
 }
 
 export async function getTOTP(userId: User["id"]) {

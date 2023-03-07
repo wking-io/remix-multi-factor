@@ -10,7 +10,7 @@ import {
   useRouteLoaderData,
 } from "@remix-run/react";
 import { createAuthenticityToken } from "remix-utils";
-import { getSession, sessionStorage } from "~/services/session.server";
+import { getSession, sessionStore } from "~/services/session.server";
 import { getEnv } from "~/utils/env";
 import { invariant } from "~/utils/invariant";
 import { getDomainUrl } from "~/utils/misc.server";
@@ -37,7 +37,7 @@ export async function loader({ request }: LoaderArgs) {
         path: new URL(request.url).pathname,
       },
     },
-    { headers: { "Set-Cookie": await sessionStorage.commitSession(session) } }
+    { headers: { "Set-Cookie": await sessionStore.commitSession(session) } }
   );
 }
 

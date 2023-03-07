@@ -1,7 +1,7 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 import { getEnvOrThrow } from "~/utils/env";
 
-export const sessionStorage = createCookieSessionStorage({
+export const sessionStore = createCookieSessionStorage({
   cookie: {
     name: "__session",
     httpOnly: true,
@@ -15,5 +15,5 @@ export const sessionStorage = createCookieSessionStorage({
 
 export async function getSession(request: Request) {
   const cookie = request.headers.get("Cookie");
-  return sessionStorage.getSession(cookie);
+  return sessionStore.getSession(cookie);
 }

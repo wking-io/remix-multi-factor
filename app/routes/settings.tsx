@@ -1,18 +1,59 @@
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { LoaderArgs } from "@remix-run/server-runtime";
+import { useLoaderData } from "@remix-run/react";
+import { ActionArgs, json, LoaderArgs } from "@remix-run/server-runtime";
 import { AuthIllo, ProfileIllo, TimeZoneIllo } from "~/components/illos";
 import Button from "~/components/kits/Button";
-import { Input, Label } from "~/components/kits/FormKit";
+import Form, { Input, Label } from "~/components/kits/FormKit";
+import { TKeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import Container from "~/components/layout/Container";
 import { requireUserId } from "~/services/auth.server";
+import { prisma } from "~/services/db.server";
 
 export async function loader({ request }: LoaderArgs) {
-  await requireUserId(request);
-  return null;
+  const userId = await requireUserId(request);
+  const twoFactorEnabled = await prisma.twoFactor
+    .findMany({
+      where: { userId },
+    })
+    .then((methods) => methods.some(({ method }) => method === "totp"));
+  return json({ twoFactorEnabled });
+}
+
+export async function action({ request }: ActionArgs) {
+  const userId = await requireUserId(request);
+  try {
+    await Promise.all([
+      prisma.twoFactor.deleteMany({
+        where: { userId, method: { contains: "totp" } },
+      }),
+      prisma.twoFactorTopt.delete({ where: { userId } }),
+    ]);
+
+    return json<TKeyedFlash>({
+      key: "global",
+      flash: { kind: "success", message: "Successfully disabled two-factor." },
+    });
+  } catch (e) {
+    // Because redirects work by throwing a Response, you need to check if the
+    // caught error is a response and return it or throw it again
+    if (e instanceof Response) return e;
+    if (e instanceof Error) {
+      return json<TKeyedFlash>({
+        key: "global",
+        flash: { kind: "error", message: e.message },
+      });
+    }
+
+    return json<TKeyedFlash>({
+      key: "global",
+      flash: { kind: "error", message: "Unknown server error." },
+    });
+  }
 }
 
 export default function Index() {
+  const { twoFactorEnabled } = useLoaderData<typeof loader>();
   return (
     <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
       <Container className="flex gap-6">
@@ -99,13 +140,26 @@ export default function Index() {
               <AuthIllo className="h-auto w-48" />
             </div>
             <div className="flex flex-1 flex-col gap-4 p-5">
-              <Button
-                to="/two-factor/totp/download"
-                variant="red"
-                prefetch="intent"
-              >
-                Enable Two-Factor
-              </Button>
+              {twoFactorEnabled ? (
+                <Form method="delete" className="w-full">
+                  <Button
+                    type="submit"
+                    variant="red"
+                    prefetch="intent"
+                    className="w-full"
+                  >
+                    Disable Two-Factor
+                  </Button>
+                </Form>
+              ) : (
+                <Button
+                  to="/two-factor/totp/download"
+                  variant="red"
+                  prefetch="intent"
+                >
+                  Enable Two-Factor
+                </Button>
+              )}
               <Button variant="orange" to="/">
                 Reset Password
               </Button>

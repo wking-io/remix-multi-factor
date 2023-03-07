@@ -19,7 +19,7 @@ import Container from "~/components/layout/Container";
 import { createUser, CreateUser } from "~/models/user.server";
 import type { RootLoaderData } from "~/root";
 import { setUserSession } from "~/services/auth.server";
-import { sessionStorage } from "~/services/session.server";
+import { sessionStore } from "~/services/session.server";
 import { getMetas, getUrl } from "~/utils/seo";
 
 export const meta: MetaFunction = ({ parentsData }) => {
@@ -60,7 +60,7 @@ export async function action({ request }: ActionArgs) {
 
   return redirect(`/onboarding/two-factor`, {
     headers: {
-      "Set-Cookie": await sessionStorage.commitSession(session),
+      "Set-Cookie": await sessionStore.commitSession(session),
     },
   });
 }
@@ -102,7 +102,7 @@ function SignUpPage({
       </div>
       <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
         {globalError ? (
-          <div className="bg-danger-100 text-danger-700 rounded-md py-2 px-3 text-sm">
+          <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
             {globalError}
           </div>
         ) : null}

@@ -16,8 +16,7 @@ import { PropsWithChildren } from "react";
 import Button from "~/components/kits/Button";
 import Form from "~/components/kits/FormKit";
 import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
-import { Text } from "~/components/kits/Text";
-import Container from "~/components/layout/Container";
+import Panel, { PanelBody } from "~/components/kits/Panel";
 import {
   createBackupCodes,
   deleteBackupCodes,
@@ -101,14 +100,17 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }) {
 
     case "existing":
       return (
-        <Form method="delete">
-          <Button>Reset Backup Codes</Button>
+        <Form
+          method="delete"
+          className="flex items-center justify-center border-t-[3px] border-indigo-900 bg-indigo-50 p-8"
+        >
+          <Button variant="indigoAlt">Reset Backup Codes</Button>
         </Form>
       );
 
     case "new":
       return (
-        <ul>
+        <ul className="grid grid-cols-2 gap-2 border-t-[3px] border-indigo-900 bg-indigo-50 p-5">
           {data.backupCodes.map((code) => (
             <li>{code}</li>
           ))}
@@ -120,28 +122,30 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }) {
 function Base({ children }: PropsWithChildren<{}>) {
   const actionData = useActionData<typeof action>();
   return (
-    <div className="bg-gradient-to-br from-brand-dark via-brand to-brand-light">
-      <Container className="flex min-h-screen flex-col items-center justify-center gap-2">
+    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-indigo-100">
+      <div className="flex max-w-md flex-col gap-4">
         <KeyedFlash flashKey="global" flash={actionData} />
-        <div className="max-w-sm rounded-xl bg-layer-1 p-4 shadow-lg transition focus-within:shadow-xl">
-          <Text variant="cardHeading">Set up two-factor authentication</Text>
-          <p className="text-sm">
-            Scan this QRCode with the app you installed as part of the previous
-            step.
-          </p>
-          {children}
-          <div className="mt-6 flex items-center justify-center bg-base p-4"></div>
-        </div>
-        <div className="flex w-full max-w-sm flex-col gap-2">
-          <Button to="/two-factor/totp/confirm" className="w-full">
-            Next: Confirm
-          </Button>
-          <Form action="/two-factor/totp" method="delete" className="w-full">
-            <Button className="w-full">Cancel</Button>
-          </Form>
-        </div>
-      </Container>
-    </div>
+        <Panel
+          className="flex-1"
+          color="bg-indigo-200 border-indigo-900 text-indigo-900"
+        >
+          <PanelBody className="overflow-hidden bg-white">
+            <div className="p-5">
+              <h1 className="text-xl font-bold">Save backup codes</h1>
+              <p className="text-sm">
+                Scan this QRCode with the app you installed in the previous
+                step. Once you have it added use the code from the app to
+                confirm your two factor setup below.
+              </p>
+            </div>
+            {children}
+          </PanelBody>
+        </Panel>
+        <Button to="/settings" variant="indigo">
+          Complete Setup
+        </Button>
+      </div>
+    </main>
   );
 }
 

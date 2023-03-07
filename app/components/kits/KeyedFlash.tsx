@@ -46,7 +46,7 @@ export function FlashMessage({
   return (
     <div className={`rounded-lg text-white shadow ${bgClass}`}>
       <div className="relative flex flex-row px-4">
-        <Icon className={`mt-2 h-6 w-6 shrink-0 ${iconClass}`} />
+        <Icon className={`mt-3 h-6 w-6 shrink-0 ${iconClass}`} />
         <div className="h-full flex-auto p-3">{message}</div>
       </div>
     </div>
