@@ -21,6 +21,6 @@ export type UserSession =
     }
   | {
       kind: "totp";
-      authenticated: boolean;
+      expires?: Date;
       userId: string;
     };

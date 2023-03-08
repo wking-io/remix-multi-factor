@@ -7,6 +7,7 @@ import {
   LoaderArgs,
   redirect,
 } from "@remix-run/server-runtime";
+import addMinutes from "date-fns/addMinutes";
 import { authenticator as twoFA } from "otplib";
 import QR from "qrcode";
 import {
@@ -117,8 +118,6 @@ export async function action({ request }: ActionArgs) {
     /**
      * Get the secret from the session so that we can validate the user
      * entered token from their OTP app. Return error if it doesn't exist.
-     * The error is required unlike on the setup route because if we
-     * generated a new secret now it would never match the user submission.
      */
     const existingTOTP = TempTOTPValidator.safeParse(
       await tempTOTP.parse(request.headers.get("Cookie"))
@@ -139,15 +138,29 @@ export async function action({ request }: ActionArgs) {
     const { secret } = existingTOTP.data;
 
     try {
+      /**
+       * Check the submitted token against the generated secret
+       */
       invariant(
         twoFA.check(token, secret),
         "Your code was invalid. Please try again."
       );
 
+      /**
+       * Save the secret to the database
+       */
       await saveTOTP({ userId, secret });
-      // Add flash message for success and redirect to url where 2FA is managed
 
+      /**
+       * We need to update both the temp secret cookie and the current user
+       * session. So, we need to use the Headers interface to submit multiple
+       * headers with the same key.
+       */
       const headers = new Headers();
+
+      /**
+       * Nullify temp secret cookie
+       **/
       headers.append(
         "Set-Cookie",
         await tempTOTP.serialize(
@@ -158,9 +171,15 @@ export async function action({ request }: ActionArgs) {
         )
       );
 
+      /**
+       * Updatre the current user session to be a two-factor session.
+       * This includes an expiration for when an action that requires
+       * a two factor challenge should be revalidated. Also, the default
+       * method to revalidate with.
+       */
       const session = await setUserSession(request, {
         kind: "totp",
-        authenticated: true,
+        expires: addMinutes(new Date(), 5),
         userId: userId,
       });
 
@@ -170,8 +189,10 @@ export async function action({ request }: ActionArgs) {
         headers,
       });
     } catch (e) {
-      // Because redirects work by throwing a Response, you need to check if the
-      // caught error is a response and return it or throw it again
+      /**
+       * Because redirects work by throwing a Response, you need to check if the
+       * caught error is a response and return it or throw it again
+       **/
       if (e instanceof Response) return e;
       if (e instanceof Error) {
         return json<TKeyedFlash>({

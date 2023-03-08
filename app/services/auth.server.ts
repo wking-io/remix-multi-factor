@@ -57,7 +57,7 @@ export async function requireUserId(
     failureRedirect: `/sign-in?${redirectTo}`,
   });
 
-  if (userSession.kind === "basic" || userSession.authenticated) {
+  if (userSession.kind === "basic" || userSession.expires) {
     return userSession.userId;
   }
 
