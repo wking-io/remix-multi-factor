@@ -169,6 +169,13 @@ export default function Index() {
             </div>
           </PanelBody>
         </Panel>
+        <Form
+          className="absolute right-6 bottom-6"
+          method="post"
+          action="/sign-out"
+        >
+          <Button variant="emerald">Okay, you can go...</Button>
+        </Form>
       </Container>
     </main>
   );

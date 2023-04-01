@@ -1,5 +1,11 @@
 import type { FormProps as RFormProps } from "@remix-run/react";
-import type { ComponentPropsWithRef } from "react";
+import {
+  ChangeEvent,
+  ComponentPropsWithRef,
+  KeyboardEvent,
+  useEffect,
+  useRef,
+} from "react";
 
 import { Popover, Transition } from "@headlessui/react";
 import {
@@ -234,3 +240,80 @@ export const Password = forwardRef(
 );
 
 Password.displayName = "FormKit.Password";
+
+export function TOTPCodeInput({
+  colors = "border-teal-900 bg-teal-200 text-teal-900",
+  inputClassName = "placeholder:text-teal-600/40",
+}: {
+  colors?: string;
+  inputClassName?: string;
+}) {
+  const [value, setValue] = useState<string>("");
+  const [refs] = useState([
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ]);
+
+  useEffect(() => {
+    const refToFocus = refs?.[value.length];
+    if (refToFocus && refToFocus.current) refToFocus.current.focus();
+  }, [refs, value]);
+
+  const updateValue = (pos: number) => (e: ChangeEvent<HTMLInputElement>) =>
+    setValue((current) => {
+      if (current.length === 0 || current.length === pos - 1) {
+        return `${current}${e.target.value}`;
+      } else if (current.length >= pos) {
+        const newValue = current.split("");
+        newValue[pos] = e.target.value;
+        return newValue.join("");
+      }
+
+      return current;
+    });
+
+  const deleteValue = (pos: number) => (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      setValue((current) => {
+        if (current.length > 0 && current.length === pos) {
+          return current.slice(0, pos - 1);
+        }
+
+        return current;
+      });
+    }
+  };
+
+  const focusCurrentDigit = () => {
+    const currentDigit = refs[value.length];
+    if (currentDigit && currentDigit.current) currentDigit.current.focus();
+  };
+
+  return (
+    <>
+      <input type="hidden" name="token" value={value} />
+      <fieldset className="mt-2 flex gap-2">
+        {refs.map((ref, i) => (
+          <label key={`digit-${i}`} onClick={focusCurrentDigit}>
+            <Input
+              type="text"
+              className={`${value.length !== i ? "pointer-events-none" : ""}`}
+              inputClassName={`${inputClassName} text-4xl font-bold text-center`}
+              value={value.charAt(i)}
+              onChange={updateValue(i)}
+              onKeyUp={deleteValue(i)}
+              placeholder={`${i + 1}`}
+              maxLength={1}
+              ref={ref}
+              colors={colors}
+            />
+          </label>
+        ))}
+      </fieldset>
+    </>
+  );
+}

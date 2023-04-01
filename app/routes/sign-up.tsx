@@ -97,7 +97,7 @@ function SignUpPage({
   const redirectTo = searchParams.get("redirectTo") ?? undefined;
   return (
     <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
-      <Container className="py-16 lg:py-20" maxWidth="max-w-xl" as="main">
+      <Container className="py-16 lg:py-20" maxWidth="max-w-xl">
         <div className="text-center">
           <Text variant="heading">Create An Account</Text>
         </div>

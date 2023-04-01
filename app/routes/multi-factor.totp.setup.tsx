@@ -10,16 +10,9 @@ import {
 import addMinutes from "date-fns/addMinutes";
 import { authenticator as totp } from "otplib";
 import QR from "qrcode";
-import {
-  ChangeEvent,
-  Fragment,
-  KeyboardEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Fragment } from "react";
 import Button from "~/components/kits/Button";
-import Form, { Input } from "~/components/kits/FormKit";
+import Form, { TOTPCodeInput } from "~/components/kits/FormKit";
 import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import { saveTOTP } from "~/models/user.server";
@@ -209,77 +202,6 @@ export async function action({ request }: ActionArgs) {
   }
 }
 
-function ConfirmationCodeInput() {
-  const [value, setValue] = useState<string>("");
-  const [refs] = useState([
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ]);
-
-  useEffect(() => {
-    const refToFocus = refs?.[value.length];
-    if (refToFocus && refToFocus.current) refToFocus.current.focus();
-  }, [refs, value]);
-
-  const updateValue = (pos: number) => (e: ChangeEvent<HTMLInputElement>) =>
-    setValue((current) => {
-      if (current.length === 0 || current.length === pos - 1) {
-        return `${current}${e.target.value}`;
-      } else if (current.length >= pos) {
-        const newValue = current.split("");
-        newValue[pos] = e.target.value;
-        return newValue.join("");
-      }
-
-      return current;
-    });
-
-  const deleteValue = (pos: number) => (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace") {
-      setValue((current) => {
-        if (current.length > 0 && current.length === pos) {
-          return current.slice(0, pos - 1);
-        }
-
-        return current;
-      });
-    }
-  };
-
-  const focusCurrentDigit = () => {
-    const currentDigit = refs[value.length];
-    if (currentDigit && currentDigit.current) currentDigit.current.focus();
-  };
-
-  return (
-    <>
-      <input type="hidden" name="token" value={value} />
-      <fieldset className="mt-2 flex gap-2">
-        {refs.map((ref, i) => (
-          <label key={`digit-${i}`} onClick={focusCurrentDigit}>
-            <Input
-              type="text"
-              className={`${value.length !== i ? "pointer-events-none" : ""}`}
-              inputClassName="text-4xl font-bold text-center placeholder:text-teal-600/40"
-              value={value.charAt(i)}
-              onChange={updateValue(i)}
-              onKeyUp={deleteValue(i)}
-              placeholder={`${i + 1}`}
-              maxLength={1}
-              ref={ref}
-              colors="border-teal-900 bg-teal-200 text-teal-900"
-            />
-          </label>
-        ))}
-      </fieldset>
-    </>
-  );
-}
-
 export default function MultiFactorTOTPSetup() {
   const { qrcode, secret } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
@@ -344,13 +266,13 @@ export default function MultiFactorTOTPSetup() {
               </Popover>
             </div>
             <div className="flex flex-col gap-3 p-5">
-              <ConfirmationCodeInput />
+              <TOTPCodeInput />
               <KeyedFlash flashKey="token" flash={actionData} />
             </div>
           </PanelBody>
         </Panel>
         <Button type="submit" variant="teal">
-          {navigation.state === "idle" ? "Confirm Setup" : "Verifying Code"}
+          {navigation.state === "idle" ? "Confirm Setup" : "Verifying..."}
         </Button>
         <Button type="submit" name="cancel" value="true" variant="tealAlt">
           Cancel

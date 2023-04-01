@@ -1,14 +1,13 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 
 import { json, redirect } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import { useActionData, useNavigation } from "@remix-run/react";
 import addMinutes from "date-fns/addMinutes";
 import { authenticator as totp } from "otplib";
 import Button from "~/components/kits/Button";
-import Form, { Input, Label } from "~/components/kits/FormKit";
+import Form, { TOTPCodeInput } from "~/components/kits/FormKit";
 import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
-import { Text } from "~/components/kits/Text";
-import Container from "~/components/layout/Container";
+import Panel, { PanelBody } from "~/components/kits/Panel";
 import { getTOTP } from "~/models/user.server";
 import { requireUserSession, setUserSession } from "~/services/auth.server";
 import { sessionStore } from "~/services/session.server";
@@ -83,41 +82,44 @@ export async function action({ request }: ActionArgs) {
 
 export default function AuthenticateTOTPPage() {
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
 
   return (
-    <div className="bg-gradient-to-br from-brand-dark via-brand to-brand-light">
-      <Container className="flex min-h-screen items-center justify-center">
-        <div className="max-w-sm rounded-xl bg-layer-1 p-4 shadow-lg transition focus-within:shadow-xl">
-          <Text variant="cardHeading">
-            Validate with multi-factor authentication
-          </Text>
-          <p className="text-sm">
-            Your account has enabled multi-factor authentication. Please enter
-            code below to finish signing in.
-          </p>
-          <Form className="mt-4 flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="token">Verification Code</Label>
-              <Input
-                name="token"
-                id="token"
-                aria-invalid={actionData ? true : undefined}
-                aria-describedby="token-error"
-              />
-              <KeyedFlash
-                id="token-error"
-                flashKey="token"
-                flash={actionData}
-              />
+    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-lime-100">
+      <Form className="flex max-w-md flex-col gap-4" method="post">
+        <KeyedFlash flashKey="global" flash={actionData} />
+        <Panel
+          className="flex-1"
+          color="bg-lime-200 border-lime-900 text-lime-900"
+        >
+          <PanelBody className="overflow-hidden bg-white">
+            <div className="p-5">
+              <h1 className="text-xl font-bold">
+                Verify your Multi-Factor Code
+              </h1>
+              <p className="text-sm">
+                Using your Authenticator app enter the verification code into
+                the field below.
+              </p>
             </div>
-            <div className="flex gap-4">
-              <Button type="submit" className="flex-1">
-                Verify
-              </Button>
+            <div className="flex flex-col gap-3 p-5">
+              <TOTPCodeInput
+                colors="border-lime-900 bg-lime-200 text-lime-900"
+                inputClassName="placeholder:text-lime-600/40"
+              />
+              <KeyedFlash flashKey="token" flash={actionData} />
             </div>
-          </Form>
-        </div>
-      </Container>
-    </div>
+          </PanelBody>
+        </Panel>
+        <Button type="submit" variant="lime">
+          {navigation.state === "idle"
+            ? "Authenticate Code"
+            : "Authenticating..."}
+        </Button>
+        <Button to="/support" variant="limeAlt">
+          Contact Support
+        </Button>
+      </Form>
+    </main>
   );
 }

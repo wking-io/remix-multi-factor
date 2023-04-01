@@ -60,14 +60,14 @@ export async function requireUserSession(
     return userSession;
   }
 
-  const multiFactorUrl = `/auth/${userSession.kind}?redirectTo=${redirectTo}`;
+  const multiFactorUrl = `/auth/totp`;
 
   // Validate that the current request is not to the multiFactor url to avoid a redirect loop
   if (redirectTo === multiFactorUrl) {
     return userSession;
   }
 
-  throw redirect(multiFactorUrl);
+  throw redirect(`${multiFactorUrl}?redirectTo=${redirectTo}`);
 }
 
 export async function requireUser(

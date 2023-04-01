@@ -22,6 +22,10 @@ const variants = {
     wrapper: "border-lime-900 bg-lime-300 hover:bg-lime-400",
     body: "bg-lime-200 text-lime-900",
   },
+  emerald: {
+    wrapper: "border-emerald-900 bg-emerald-600 hover:bg-emerald-800",
+    body: "bg-emerald-400 text-white",
+  },
   teal: {
     wrapper: "border-teal-900 bg-teal-600 hover:bg-teal-800",
     body: "bg-teal-400 text-white",

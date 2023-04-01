@@ -59,45 +59,56 @@ export async function action({ request }: ActionArgs) {
   }
 }
 
+const colors = "border-cyan-900 bg-cyan-200 text-cyan-900";
 function SignInPage({ globalError }: { globalError?: string }) {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? undefined;
   return (
-    <Container className="py-16 lg:py-20" maxWidth="max-w-xl" as="main">
-      <div className="text-center">
-        <Text variant="heading">Sign Into Account</Text>
-      </div>
-      <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
-        {globalError ? (
-          <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
-            {globalError}
+    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
+      <Container className="py-16 lg:py-20" maxWidth="max-w-xl">
+        <div className="text-center">
+          <Text variant="heading">Sign Into Account</Text>
+        </div>
+        <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
+          {globalError ? (
+            <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
+              {globalError}
+            </div>
+          ) : null}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              colors={colors}
+              type="email"
+              name="email"
+              id="email"
+              required
+            />
           </div>
-        ) : null}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input type="email" name="email" id="email" required />
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start gap-1">
-            <Label htmlFor="password">Password</Label>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-1">
+              <Label htmlFor="password">Password</Label>
+            </div>
+            <Password colors={colors} name="password" id="password" required />
           </div>
-          <Password name="password" id="password" required />
-        </div>
-        <Button type="submit">Sign Into Account</Button>
-        <div className="text-center text-sm text-gray-500">
-          Don't have an account?{" "}
-          <Link
-            className="text-brand hover:text-brand-light hover:underline"
-            to={{
-              pathname: "/sign-up",
-              search: searchParams.toString(),
-            }}
-          >
-            Sign up
-          </Link>
-        </div>
-      </Form>
-    </Container>
+          <Button type="submit" variant="teal">
+            Sign Into Account
+          </Button>
+          <div className="text-center text-sm text-gray-500">
+            Don't have an account?{" "}
+            <Link
+              className="text-brand hover:text-brand-light hover:underline"
+              to={{
+                pathname: "/sign-up",
+                search: searchParams.toString(),
+              }}
+            >
+              Sign up
+            </Link>
+          </div>
+        </Form>
+      </Container>
+    </main>
   );
 }
 
