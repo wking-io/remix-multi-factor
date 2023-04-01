@@ -1,58 +1,64 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 
 import { json, redirect } from "@remix-run/node";
-import { ThrownResponse, useActionData, useCatch } from "@remix-run/react";
-import { authenticator as twoFA } from "otplib";
+import { useActionData } from "@remix-run/react";
+import addMinutes from "date-fns/addMinutes";
+import { authenticator as totp } from "otplib";
 import Button from "~/components/kits/Button";
-import Form, { FieldError, Input, Label } from "~/components/kits/FormKit";
+import Form, { Input, Label } from "~/components/kits/FormKit";
+import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
 import { Text } from "~/components/kits/Text";
 import Container from "~/components/layout/Container";
 import { getTOTP } from "~/models/user.server";
-import { requireUserId, setUserSession } from "~/services/auth.server";
+import { requireUserSession, setUserSession } from "~/services/auth.server";
 import { sessionStore } from "~/services/session.server";
 import { invariant } from "~/utils/invariant";
 import { safeRedirect } from "~/utils/misc.server";
 
 export async function loader({ request }: LoaderArgs) {
-  await requireUserId(request);
+  await requireUserSession(request);
   return null;
 }
 
 export async function action({ request }: ActionArgs) {
-  const userId = await requireUserId(request);
+  const { userId } = await requireUserSession(request);
   const formData = await request.clone().formData();
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/dashboard");
 
   const token = formData.get("token");
   if (typeof token !== "string") {
     // return error
-    return json(
-      {
+    return json<TKeyedFlash>({
+      key: "token",
+      flash: {
+        kind: "error",
         message: "A verification code is required.",
       },
-      { status: 404 }
-    );
+    });
   }
 
-  const secret = await getTOTP(userId);
+  const userTOTP = await getTOTP(userId);
 
-  if (!secret) {
+  if (!userTOTP) {
     // return error
-    return json({
-      message:
-        "There was an issue getting your temporary secret. Please reload and try again.",
+    return json<TKeyedFlash>({
+      key: "token",
+      flash: {
+        kind: "error",
+        message: "There was an issue getting your TOTP data.",
+      },
     });
   }
 
   try {
     invariant(
-      twoFA.check(token, secret.secret),
+      totp.check(token, userTOTP.secret),
       "Your code was invalid. Please try again."
     );
 
     const session = await setUserSession(request, {
-      kind: "totp",
-      authenticated: true,
+      kind: "multiFactor",
+      expires: addMinutes(new Date(), 5),
       userId,
     });
 
@@ -62,24 +68,31 @@ export async function action({ request }: ActionArgs) {
       },
     });
   } catch (e) {
-    if (e instanceof Error) {
-      throw json({ message: e.message });
-    }
+    // Log to your error service
+    console.log(e);
 
-    throw json({ message: "Unknown server error." });
+    return json<TKeyedFlash>({
+      key: "global",
+      flash: {
+        message: e instanceof Error ? e.message : "Unknown server error.",
+        kind: "error",
+      },
+    });
   }
 }
 
-function OnboardingTwoFactorPage({ error }: { error?: string }) {
+export default function AuthenticateTOTPPage() {
+  const actionData = useActionData<typeof action>();
+
   return (
     <div className="bg-gradient-to-br from-brand-dark via-brand to-brand-light">
       <Container className="flex min-h-screen items-center justify-center">
         <div className="max-w-sm rounded-xl bg-layer-1 p-4 shadow-lg transition focus-within:shadow-xl">
           <Text variant="cardHeading">
-            Validate with two-factor authentication
+            Validate with multi-factor authentication
           </Text>
           <p className="text-sm">
-            Your account has enabled two-factor authentication. Please enter
+            Your account has enabled multi-factor authentication. Please enter
             code below to finish signing in.
           </p>
           <Form className="mt-4 flex flex-col gap-4">
@@ -88,12 +101,13 @@ function OnboardingTwoFactorPage({ error }: { error?: string }) {
               <Input
                 name="token"
                 id="token"
-                aria-invalid={error ? true : undefined}
+                aria-invalid={actionData ? true : undefined}
                 aria-describedby="token-error"
               />
-              <FieldError
-                name="token-error"
-                errors={error ? { _errors: [error] } : undefined}
+              <KeyedFlash
+                id="token-error"
+                flashKey="token"
+                flash={actionData}
               />
             </div>
             <div className="flex gap-4">
@@ -106,16 +120,4 @@ function OnboardingTwoFactorPage({ error }: { error?: string }) {
       </Container>
     </div>
   );
-}
-
-export default function OnboardingTwoFactor() {
-  const actionData = useActionData<typeof action>();
-  return <OnboardingTwoFactorPage error={actionData?.message} />;
-}
-
-export function ErrorBoundary() {}
-
-export function CatchBoundary() {
-  const caught = useCatch<ThrownResponse<number, { message: string }>>();
-  return <OnboardingTwoFactorPage error={caught.data?.message} />;
 }

@@ -10,7 +10,7 @@ import { ChartIllo } from "~/components/illos";
 import Button from "~/components/kits/Button";
 import Panel, { PanelBody, PanelLink } from "~/components/kits/Panel";
 import Container from "~/components/layout/Container";
-import { requireUserId } from "~/services/auth.server";
+import { requireUserSession } from "~/services/auth.server";
 import { isEven } from "~/utils/misc";
 
 const replicas = ["Softserve East", "Softserve Europe", "Softserve Asia"];
@@ -46,7 +46,7 @@ const cacheRates = [
 ];
 
 export async function loader({ request }: LoaderArgs) {
-  await requireUserId(request);
+  await requireUserSession(request);
   return null;
 }
 

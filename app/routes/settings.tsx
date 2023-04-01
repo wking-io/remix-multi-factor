@@ -7,32 +7,35 @@ import Form, { Input, Label } from "~/components/kits/FormKit";
 import { TKeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import Container from "~/components/layout/Container";
-import { requireUserId } from "~/services/auth.server";
+import { requireUserSession } from "~/services/auth.server";
 import { prisma } from "~/services/db.server";
 
 export async function loader({ request }: LoaderArgs) {
-  const userId = await requireUserId(request);
-  const twoFactorEnabled = await prisma.twoFactor
+  const { userId } = await requireUserSession(request);
+  const multiFactorEnabled = await prisma.multiFactor
     .findMany({
       where: { userId },
     })
     .then((methods) => methods.some(({ method }) => method === "totp"));
-  return json({ twoFactorEnabled });
+  return json({ multiFactorEnabled });
 }
 
 export async function action({ request }: ActionArgs) {
-  const userId = await requireUserId(request);
+  const { userId } = await requireUserSession(request);
   try {
     await Promise.all([
-      prisma.twoFactor.deleteMany({
+      prisma.multiFactor.deleteMany({
         where: { userId, method: { contains: "totp" } },
       }),
-      prisma.twoFactorTopt.delete({ where: { userId } }),
+      prisma.multiFactorTopt.delete({ where: { userId } }),
     ]);
 
     return json<TKeyedFlash>({
       key: "global",
-      flash: { kind: "success", message: "Successfully disabled two-factor." },
+      flash: {
+        kind: "success",
+        message: "Successfully disabled multi-factor.",
+      },
     });
   } catch (e) {
     // Because redirects work by throwing a Response, you need to check if the
@@ -53,7 +56,7 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Index() {
-  const { twoFactorEnabled } = useLoaderData<typeof loader>();
+  const { multiFactorEnabled } = useLoaderData<typeof loader>();
   return (
     <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
       <Container className="flex gap-6">
@@ -140,7 +143,7 @@ export default function Index() {
               <AuthIllo className="h-auto w-48" />
             </div>
             <div className="flex flex-1 flex-col gap-4 p-5">
-              {twoFactorEnabled ? (
+              {multiFactorEnabled ? (
                 <Form method="delete" className="w-full">
                   <Button
                     type="submit"
@@ -148,16 +151,16 @@ export default function Index() {
                     prefetch="intent"
                     className="w-full"
                   >
-                    Disable Two-Factor
+                    Disable multi-factor
                   </Button>
                 </Form>
               ) : (
                 <Button
-                  to="/two-factor/totp/download"
+                  to="/multi-factor/totp/download"
                   variant="red"
                   prefetch="intent"
                 >
-                  Enable Two-Factor
+                  Enable multi-factor
                 </Button>
               )}
               <Button variant="orange" to="/">

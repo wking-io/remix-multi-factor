@@ -42,6 +42,10 @@ const variants = {
     wrapper: "border-blue-900 bg-blue-600 hover:bg-blue-800",
     body: "bg-blue-400 text-white",
   },
+  blueAlt: {
+    wrapper: "border-blue-900 bg-blue-300 hover:bg-blue-400",
+    body: "bg-blue-200 text-blue-900",
+  },
   indigo: {
     wrapper: "border-indigo-900 bg-indigo-600 hover:bg-indigo-800",
     body: "bg-indigo-400 text-white",
@@ -76,7 +80,7 @@ export default function Button({
       className={`${baseClasses} ${wrapper} ${className ?? ""}`}
     >
       <div
-        className={`${body} flex items-center justify-center rounded-lg py-2 px-4 text-sm font-bold`}
+        className={`${body} flex items-center justify-center gap-2 rounded-lg py-2 px-4 text-sm font-bold`}
       >
         {children}
       </div>

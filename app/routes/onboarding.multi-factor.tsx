@@ -1,5 +1,5 @@
 import { AndriodIcon, ChromeIcon, IOSIcon } from "~/components/icons";
-import { DownloadIllo } from "~/components/illos";
+import { AuthIllo } from "~/components/illos";
 import Button from "~/components/kits/Button";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 
@@ -51,53 +51,34 @@ const apps = [
   },
 ];
 
-export default function TwoFactorTOTPDownload() {
+export default function OnboardingMultiFactor() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
+    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-blue-100">
       <div className="flex max-w-md flex-col gap-4">
         <Panel
           className="flex-1"
-          color="bg-pink-200 border-pink-900 text-pink-900"
+          color="bg-blue-200 border-blue-900 text-blue-900"
         >
           <PanelBody className="overflow-hidden bg-white">
-            <div className="flex items-center justify-center bg-pink-100 px-5">
-              <DownloadIllo className="h-56 w-auto" />
+            <div className="flex items-center justify-center bg-blue-100 px-5 py-8">
+              <AuthIllo className="h-56 w-auto" />
             </div>
             <div className="p-5">
-              <h1 className="text-xl font-bold">Download Authenticator App</h1>
+              <h1 className="text-xl font-bold">
+                Enable Multi-Factor Authentication
+              </h1>
               <p className="mt-3">
-                To use this two-factor method it requires you to download a 3rd
-                party authenticator app on a secondary device. If you do not
-                already have one that you use you can find links for two great
-                ones below:
+                I mean...at this point you should be doing this with every
+                account that offers it.
               </p>
-              <div className="mt-6 flex flex-col gap-4">
-                {apps.map(({ name, links }) => (
-                  <div key={name} className="flex justify-between">
-                    <p className="font-medium uppercase">{name}</p>
-                    <div className="flex items-center gap-2">
-                      {links.map(({ icon: Icon, href, description }) => (
-                        <a
-                          key={href}
-                          href={href}
-                          className="h-4 w-auto hover:text-pink-600"
-                        >
-                          <span className="sr-only">{description}</span>
-                          <Icon className="h-full w-auto" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </PanelBody>
         </Panel>
-        <Button to="/two-factor/totp/setup" variant="pink">
-          Next: Setup
+        <Button to="/multi-factor/totp/download" variant="blue">
+          Enable Multi-Factor
         </Button>
-        <Button to="/settings" variant="pinkAlt">
-          Cancel
+        <Button to="/dashboard" variant="blueAlt">
+          Skip
         </Button>
       </div>
     </main>

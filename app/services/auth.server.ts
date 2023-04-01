@@ -34,10 +34,9 @@ authenticator.use(
 
 export function sessionFromVerification({
   userId,
-}: {
-  userId: string;
-}): UserSession {
-  return { kind: "basic", userId };
+  multiFactorEnabled,
+}: Awaited<ReturnType<typeof verifyLogin>>): UserSession {
+  return { kind: multiFactorEnabled ? "multiFactor" : "basic", userId };
 }
 
 export async function setUserSession(request: Request, data: UserSession) {
@@ -49,32 +48,35 @@ export async function setUserSession(request: Request, data: UserSession) {
 /**
  * Helpers
  */
-export async function requireUserId(
+export async function requireUserSession(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
 ) {
   const userSession = await authenticator.isAuthenticated(request, {
-    failureRedirect: `/sign-in?${redirectTo}`,
+    failureRedirect: `/sign-in?redirectTo=${redirectTo}`,
   });
 
   if (userSession.kind === "basic" || userSession.expires) {
-    return userSession.userId;
+    return userSession;
   }
 
-  const twoFactorUrl = `/auth/${userSession.kind}`;
+  const multiFactorUrl = `/auth/${userSession.kind}?redirectTo=${redirectTo}`;
 
-  // Validate that the current request is not to the twoFactor url to avoid a redirect loop
-  if (redirectTo === twoFactorUrl) {
-    return userSession.userId;
+  // Validate that the current request is not to the multiFactor url to avoid a redirect loop
+  if (redirectTo === multiFactorUrl) {
+    return userSession;
   }
 
-  throw redirect(twoFactorUrl);
+  throw redirect(multiFactorUrl);
 }
 
-export async function requireUser(request: Request): Promise<User> {
-  const userId = await requireUserId(request);
+export async function requireUser(
+  request: Request
+): Promise<User & Omit<UserSession, "userId">> {
+  const { userId, ...rest } = await requireUserSession(request);
   try {
-    return await getUserById(userId);
+    const user = await getUserById(userId);
+    return { ...user, ...rest };
   } catch (e) {
     throw redirect("/sign-in");
   }
@@ -84,8 +86,10 @@ export async function maybeUser(request: Request): Promise<User | null> {
   const userSession = await authenticator.isAuthenticated(request);
 
   if (!userSession) return null;
+  const { userId, ...rest } = userSession;
   try {
-    return await getUserById(userSession?.userId);
+    const user = await getUserById(userId);
+    return { ...user, ...rest };
   } catch (e) {
     throw redirect("/sign-in");
   }
@@ -107,7 +111,7 @@ export const TempTOTPValidator = z.object({ secret: z.string() });
 
 // The init function returns a custom createId function with the specified
 // configuration.
-export function generateBackupCodes(email: string): string[] {
+export function generateRecoveryCodes(email: string): string[] {
   /**
    * Initialiaze the cuid maker with the user email for a even
    * better randomized output with less chance of collision.

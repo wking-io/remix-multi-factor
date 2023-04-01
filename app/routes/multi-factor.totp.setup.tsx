@@ -1,6 +1,6 @@
 import { Popover, Transition } from "@headlessui/react";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
-import { useActionData, useLoaderData } from "@remix-run/react";
+import { useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import {
   ActionArgs,
   json,
@@ -8,7 +8,7 @@ import {
   redirect,
 } from "@remix-run/server-runtime";
 import addMinutes from "date-fns/addMinutes";
-import { authenticator as twoFA } from "otplib";
+import { authenticator as totp } from "otplib";
 import QR from "qrcode";
 import {
   ChangeEvent,
@@ -25,7 +25,7 @@ import Panel, { PanelBody } from "~/components/kits/Panel";
 import { saveTOTP } from "~/models/user.server";
 import {
   requireUser,
-  requireUserId,
+  requireUserSession,
   setUserSession,
   tempTOTP,
   TempTOTPValidator,
@@ -58,8 +58,8 @@ export async function loader({ request }: LoaderArgs) {
      * is not broken with a server error when we can easily generate a new
      * secret and save the cookie.
      */
-    const secret = twoFA.generateSecret();
-    const otpauth = twoFA.keyuri(user.email, getEnvOrThrow("APP_NAME"), secret);
+    const secret = totp.generateSecret();
+    const otpauth = totp.keyuri(user.email, getEnvOrThrow("APP_NAME"), secret);
     const qrcode = await QR.toDataURL(otpauth);
 
     return json(
@@ -75,14 +75,14 @@ export async function loader({ request }: LoaderArgs) {
   }
 
   const { secret } = existingTOTP.data;
-  const otpauth = twoFA.keyuri(user.email, getEnvOrThrow("APP_NAME"), secret);
+  const otpauth = totp.keyuri(user.email, getEnvOrThrow("APP_NAME"), secret);
   const qrcode = await QR.toDataURL(otpauth);
 
   return json({ qrcode, secret });
 }
 
 export async function action({ request }: ActionArgs) {
-  const userId = await requireUserId(request);
+  const { userId } = await requireUserSession(request);
   const formData = await request.clone().formData();
 
   if (formData.get("cancel")) {
@@ -142,7 +142,7 @@ export async function action({ request }: ActionArgs) {
        * Check the submitted token against the generated secret
        */
       invariant(
-        twoFA.check(token, secret),
+        totp.check(token, secret),
         "Your code was invalid. Please try again."
       );
 
@@ -172,20 +172,20 @@ export async function action({ request }: ActionArgs) {
       );
 
       /**
-       * Updatre the current user session to be a two-factor session.
+       * Updatre the current user session to be a multi-factor session.
        * This includes an expiration for when an action that requires
        * a two factor challenge should be revalidated. Also, the default
        * method to revalidate with.
        */
       const session = await setUserSession(request, {
-        kind: "totp",
+        kind: "multiFactor",
         expires: addMinutes(new Date(), 5),
         userId: userId,
       });
 
       headers.append("Set-Cookie", await sessionStore.commitSession(session));
 
-      return redirect("/two-factor/totp/backup", {
+      return redirect("/settings", {
         headers,
       });
     } catch (e) {
@@ -280,9 +280,10 @@ function ConfirmationCodeInput() {
   );
 }
 
-export default function TwoFactorTOTPSetup() {
+export default function MultiFactorTOTPSetup() {
   const { qrcode, secret } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
 
   return (
     <main className="relative flex min-h-screen items-center justify-center gap-4 bg-teal-100">
@@ -295,7 +296,7 @@ export default function TwoFactorTOTPSetup() {
           <PanelBody className="overflow-hidden bg-white">
             <div className="p-5">
               <h1 className="text-xl font-bold">
-                Set up two-factor authentication
+                Set up multi-factor authentication
               </h1>
               <p className="text-sm">
                 Scan this QRCode with the app you installed in the previous
@@ -349,7 +350,7 @@ export default function TwoFactorTOTPSetup() {
           </PanelBody>
         </Panel>
         <Button type="submit" variant="teal">
-          Confirm Setup
+          {navigation.state === "idle" ? "Confirm Setup" : "Verifying Code"}
         </Button>
         <Button type="submit" name="cancel" value="true" variant="tealAlt">
           Cancel

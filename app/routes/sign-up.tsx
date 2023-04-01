@@ -58,13 +58,14 @@ export async function action({ request }: ActionArgs) {
     userId: user.id,
   });
 
-  return redirect(`/onboarding/two-factor`, {
+  return redirect(`/onboarding/multi-factor`, {
     headers: {
       "Set-Cookie": await sessionStore.commitSession(session),
     },
   });
 }
 
+const colors = "border-cyan-900 bg-cyan-200 text-cyan-900";
 function SignUpPage({
   globalError,
   errors,
@@ -72,7 +73,6 @@ function SignUpPage({
   globalError?: string;
   errors?: RequestErrors;
 }) {
-  const nameRef = useRef<HTMLInputElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -96,107 +96,116 @@ function SignUpPage({
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? undefined;
   return (
-    <Container className="py-16 lg:py-20" maxWidth="max-w-xl" as="main">
-      <div className="text-center">
-        <Text variant="heading">Create An Account</Text>
-      </div>
-      <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
-        {globalError ? (
-          <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
-            {globalError}
+    <main className="relative flex min-h-screen items-center justify-center gap-4 bg-pink-100">
+      <Container className="py-16 lg:py-20" maxWidth="max-w-xl" as="main">
+        <div className="text-center">
+          <Text variant="heading">Create An Account</Text>
+        </div>
+        <Form redirectTo={redirectTo} className="mt-12 flex flex-col gap-4">
+          {globalError ? (
+            <div className="rounded-md bg-danger-100 py-2 px-3 text-sm text-danger-700">
+              {globalError}
+            </div>
+          ) : null}
+          <div className="flex gap-4">
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                colors={colors}
+                ref={firstNameRef}
+                type="text"
+                name="firstName"
+                id="firstName"
+                required
+                aria-invalid={errors?.firstName ? true : undefined}
+                aria-describedby="firstName-error"
+              />
+              <FieldError name="firstName-error" errors={errors?.firstName} />
+            </div>
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                colors={colors}
+                ref={lastNameRef}
+                type="text"
+                name="lastName"
+                id="lastName"
+                required
+                aria-invalid={errors?.lastName ? true : undefined}
+                aria-describedby="lastName-error"
+              />
+              <FieldError name="lastName-error" errors={errors?.lastName} />
+            </div>
           </div>
-        ) : null}
-        <div className="flex gap-4">
-          <div className="flex flex-1 flex-col gap-2">
-            <Label htmlFor="firstName">First Name</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">Email</Label>
             <Input
-              ref={firstNameRef}
-              type="text"
-              name="firstName"
-              id="firstName"
+              colors={colors}
+              ref={emailRef}
+              type="email"
+              name="email"
+              id="email"
               required
-              aria-invalid={errors?.firstName ? true : undefined}
-              aria-describedby="firstName-error"
+              aria-invalid={errors?.email ? true : undefined}
+              aria-describedby="email-error"
             />
-            <FieldError name="firstName-error" errors={errors?.firstName} />
+            <FieldError name="email-error" errors={errors?.email} />
           </div>
-          <div className="flex flex-1 flex-col gap-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              ref={lastNameRef}
-              type="text"
-              name="lastName"
-              id="lastName"
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-1">
+              <Label htmlFor="password">Password</Label>
+              <FieldInfo>
+                <ul className="flex w-56 list-disc flex-col gap-1 p-4 pl-8 text-sm">
+                  {passwordRequirements.map((req) => (
+                    <li key={req} className="">
+                      {req}
+                    </li>
+                  ))}
+                </ul>
+              </FieldInfo>
+            </div>
+            <Password
+              colors={colors}
+              ref={passwordRef}
+              name="password"
+              id="password"
               required
-              aria-invalid={errors?.lastName ? true : undefined}
-              aria-describedby="lastName-error"
+              aria-invalid={errors?.password ? true : undefined}
+              aria-describedby="password-error"
             />
-            <FieldError name="lastName-error" errors={errors?.lastName} />
+            <FieldError name="password-error" errors={errors?.password} />
           </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            ref={emailRef}
-            type="email"
-            name="email"
-            id="email"
-            required
-            aria-invalid={errors?.email ? true : undefined}
-            aria-describedby="email-error"
-          />
-          <FieldError name="email-error" errors={errors?.email} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start gap-1">
-            <Label htmlFor="password">Password</Label>
-            <FieldInfo>
-              <ul className="flex w-56 list-disc flex-col gap-1 p-4 pl-8 text-sm">
-                {passwordRequirements.map((req) => (
-                  <li key={req} className="">
-                    {req}
-                  </li>
-                ))}
-              </ul>
-            </FieldInfo>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="passwordConfirm">Confirm Password</Label>
+            <Password
+              colors={colors}
+              ref={passwordConfirmRef}
+              name="passwordConfirm"
+              id="passwordConfirm"
+              required
+              aria-invalid={errors?.passwordConfirm ? true : undefined}
+              aria-describedby="passwordConfirm-error"
+            />
+            <FieldError
+              name="passwordConfirm-error"
+              errors={errors?.passwordConfirm}
+            />
           </div>
-          <Password
-            ref={passwordRef}
-            name="password"
-            id="password"
-            required
-            aria-invalid={errors?.password ? true : undefined}
-            aria-describedby="password-error"
-          />
-          <FieldError name="password-error" errors={errors?.password} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="passwordConfirm">Confirm Password</Label>
-          <Password
-            ref={passwordConfirmRef}
-            name="passwordConfirm"
-            id="passwordConfirm"
-            required
-            aria-invalid={errors?.passwordConfirm ? true : undefined}
-            aria-describedby="passwordConfirm-error"
-          />
-          <FieldError
-            name="passwordConfirm-error"
-            errors={errors?.passwordConfirm}
-          />
-        </div>
-        <Button type="submit">Create Account</Button>
-        <p className="text-center text-sm">
-          Already have an account?{" "}
-          <Link
-            to="/sign-in"
-            className="text-brand hover:text-brand-light hover:underline"
-          >
-            Sign In
-          </Link>
-        </p>
-      </Form>
-    </Container>
+          <Button type="submit" variant="cyan">
+            Create Account
+          </Button>
+          <p className="text-center text-sm">
+            Already have an account?{" "}
+            <Link
+              to="/sign-in"
+              className="text-brand hover:text-brand-light hover:underline"
+            >
+              Sign In
+            </Link>
+          </p>
+        </Form>
+      </Container>
+    </main>
   );
 }
 

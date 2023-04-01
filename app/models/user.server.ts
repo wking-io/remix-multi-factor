@@ -81,6 +81,7 @@ export async function verifyLogin({
     select: {
       id: true,
       password: { select: { hash: true } },
+      multiFactor: { select: { id: true } },
     },
   });
 
@@ -99,6 +100,7 @@ export async function verifyLogin({
 
   return {
     userId: userWithPassword.id,
+    multiFactorEnabled: Boolean(userWithPassword.multiFactor),
   };
 }
 
@@ -142,24 +144,25 @@ export async function saveTOTP({
   userId: User["id"];
   secret: string;
 }) {
-  return Promise.all([
-    prisma.twoFactorTopt.create({
-      data: { secret, user: { connect: { id: userId } } },
-    }),
-    prisma.twoFactor.create({
-      data: {
-        isDefault: true,
-        method: "totp",
-        user: {
-          connect: { id: userId },
-        },
+  const { id } = await prisma.multiFactor.create({
+    data: {
+      method: "totp",
+      user: {
+        connect: { id: userId },
       },
-    }),
-  ]);
+    },
+  });
+  return prisma.multiFactorTopt.create({
+    data: {
+      secret,
+      multiFactor: { connect: { id } },
+      user: { connect: { id: userId } },
+    },
+  });
 }
 
 export async function getTOTP(userId: User["id"]) {
-  return prisma.twoFactorTopt.findUnique({
+  return prisma.multiFactorTopt.findUnique({
     where: { userId },
   });
 }

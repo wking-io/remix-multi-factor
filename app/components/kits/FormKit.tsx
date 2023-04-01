@@ -196,26 +196,32 @@ Checkbox.displayName = "FormKit.Checkbox";
 
 export const Password = forwardRef(
   (
-    { className, ...props }: Omit<React.ComponentProps<"input">, "type">,
+    {
+      className,
+      inputClassName = "",
+      colors = "border-emerald-900 bg-emerald-200 text-emerald-900",
+      ...props
+    }: Omit<React.ComponentProps<"input">, "type"> & {
+      colors?: string;
+      inputClassName?: string;
+    },
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const [showPassword, setShowPassword] = useState(false);
     return (
       <div
-        className={`flex flex-row rounded-md border p-1 focus-within:border-brand focus-within:ring focus-within:ring-brand-light/50 ${
-          className ?? ""
-        }`}
+        className={`${colors} ${className} group relative rounded-[10px] border-[3px] pb-1 transition-all focus-within:pt-1 focus-within:pb-0`}
       >
         <input
           {...props}
           type={showPassword ? "text" : "password"}
           ref={ref}
-          className="block flex-1 appearance-none rounded-l-sm border-transparent px-2 py-1 focus:border-transparent focus:outline-none focus:ring-0"
+          className={`${inputClassName} w-full rounded-lg border-0 bg-white`}
         />
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
-          className="shrink-0 rounded px-2 hover:bg-brand/10 focus:bg-brand-light/10 focus:outline-none"
+          className="absolute right-2 top-1.5 shrink-0 rounded p-1 transition hover:text-cyan-500 focus:text-cyan-400 focus:outline-none group-focus-within:top-2.5"
         >
           <EyeIcon className={`${showPassword ? "hidden" : ""} h-5 w-5`} />
           <EyeSlashIcon

@@ -20,7 +20,7 @@ export type UserSession =
       userId: string;
     }
   | {
-      kind: "totp";
+      kind: "multiFactor";
       expires?: Date;
       userId: string;
     };
