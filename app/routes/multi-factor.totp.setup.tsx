@@ -80,7 +80,8 @@ export async function action({ request }: ActionArgs) {
 
   if (formData.get("cancel")) {
     /**
-     * Cancel button on this step will clear the temp cookie set and redirect back to the settings page.
+     * Cancel button on this step will clear the temp cookie set
+     * and redirect back to the settings page.
      */
     return redirect("/settings", {
       headers: {

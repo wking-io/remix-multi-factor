@@ -1,12 +1,5 @@
 import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/solid";
-import {
-  Link,
-  ThrownResponse,
-  useActionData,
-  useCatch,
-  useLoaderData,
-  useNavigation,
-} from "@remix-run/react";
+import { useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import {
   ActionArgs,
   json,
@@ -14,7 +7,7 @@ import {
   redirect,
   SerializeFrom,
 } from "@remix-run/server-runtime";
-import { PropsWithChildren, useCallback } from "react";
+import { ReactElement, useCallback } from "react";
 import Button from "~/components/kits/Button";
 import Form from "~/components/kits/FormKit";
 import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
@@ -31,11 +24,9 @@ import {
   requireUserSession,
 } from "~/services/auth.server";
 
-type RecoveryLoaderError = { kind: "error" };
 type RecoveryLoaderData =
   | { kind: "existing" }
-  | { kind: "new"; recoveryCodes: string[] }
-  | RecoveryLoaderError;
+  | { kind: "new"; recoveryCodes: string[] };
 
 export async function loader({ request }: LoaderArgs) {
   const user = await requireUser(request);
@@ -47,23 +38,17 @@ export async function loader({ request }: LoaderArgs) {
    * display again so it is a one time shot.
    */
   const existingRecoveryCodes = await listRecoveryCodes({ userId: user.id });
-  if (existingRecoveryCodes?.length)
+  if (existingRecoveryCodes?.length) {
     return json<RecoveryLoaderData>({ kind: "existing" });
+  }
 
   /**
    * We are going to generate new recovery codes and save them to the database
    * if they do not have any recovery codes yet.
    */
-  try {
-    const recoveryCodes = generateRecoveryCodes(user.email);
-    await createRecoveryCodes({ recoveryCodes, userId: user.id });
-    return json<RecoveryLoaderData>({ kind: "new", recoveryCodes });
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    // Log to your exception tracker of choice
-    console.log(error);
-    throw error;
-  }
+  const recoveryCodes = generateRecoveryCodes(user.email);
+  await createRecoveryCodes({ recoveryCodes, userId: user.id });
+  return json<RecoveryLoaderData>({ kind: "new", recoveryCodes });
 }
 
 export async function action({ request }: ActionArgs) {
@@ -96,7 +81,7 @@ export async function action({ request }: ActionArgs) {
   }
 }
 
-function Body({ data }: { data: SerializeFrom<typeof loader> }) {
+function Body({ data }: { data: SerializeFrom<typeof loader> }): ReactElement {
   const [isCopied, startCooldown] = useCooldown();
   const navigation = useNavigation();
 
@@ -108,9 +93,6 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }) {
   }, [data]);
 
   switch (data.kind) {
-    case "error":
-      return <Link to=".">Retry</Link>;
-
     case "existing":
       return (
         <Form
@@ -154,7 +136,8 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }) {
   }
 }
 
-function Base({ children }: PropsWithChildren<{}>) {
+export default function MultiFactorRecoveryPage() {
+  const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
@@ -174,7 +157,7 @@ function Base({ children }: PropsWithChildren<{}>) {
                 confirm your two factor setup below.
               </p>
             </div>
-            {children}
+            <Body data={loaderData} />
           </PanelBody>
         </Panel>
         <Button to="/multi-factor/totp/setup" variant="indigo">
@@ -182,23 +165,5 @@ function Base({ children }: PropsWithChildren<{}>) {
         </Button>
       </div>
     </main>
-  );
-}
-
-export default function MultiFactorTOTPRecovery() {
-  const loaderData = useLoaderData<typeof loader>();
-  return (
-    <Base>
-      <Body data={loaderData} />
-    </Base>
-  );
-}
-
-export function CatchBoundary() {
-  const caught = useCatch<ThrownResponse<number, RecoveryLoaderError>>();
-  return (
-    <Base>
-      <Body data={caught.data} />
-    </Base>
   );
 }
