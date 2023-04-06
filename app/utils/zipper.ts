@@ -42,7 +42,7 @@ export function fromArray<A>(array: readonly A[]): T<A> {
 }
 
 export function current<A>({ current }: NonEmptyZipperObj<A>): A;
-export function current<A>({ current }: EmptyZipperObj): undefined;
+export function current({ current }: EmptyZipperObj): undefined;
 export function current<A>({ current }: T<A>): A | undefined {
   return current;
 }

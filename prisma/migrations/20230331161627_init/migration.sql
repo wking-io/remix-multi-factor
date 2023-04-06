@@ -19,7 +19,7 @@ CREATE TABLE "password" (
 -- CreateTable
 CREATE TABLE "multi_factor" (
     "multi_factor_id" TEXT NOT NULL,
-    "method" TEXT NOT NULL,
+    "method" TEXT NOT NULL CHECK ("method" IN ('totp')),
     "user_id" TEXT NOT NULL,
 
     CONSTRAINT "multi_factor_pkey" PRIMARY KEY ("multi_factor_id")

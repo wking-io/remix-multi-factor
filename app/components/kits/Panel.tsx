@@ -1,6 +1,7 @@
-import { Link, LinkProps } from "@remix-run/react";
-import { PropsWithChildren } from "react";
-import { PropsWithClassName } from "~/types";
+import type { LinkProps } from "@remix-run/react";
+import { Link } from "@remix-run/react";
+import type { PropsWithChildren } from "react";
+import type { PropsWithClassName } from "~/types";
 
 export default function Panel({
   children,

@@ -1,16 +1,17 @@
 import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/solid";
 import { useActionData, useLoaderData, useNavigation } from "@remix-run/react";
-import {
+import type {
   ActionArgs,
-  json,
   LoaderArgs,
-  redirect,
   SerializeFrom,
 } from "@remix-run/server-runtime";
-import { ReactElement, useCallback } from "react";
+import { json, redirect } from "@remix-run/server-runtime";
+import type { ReactElement } from "react";
+import { useCallback } from "react";
 import Button from "~/components/kits/Button";
 import Form from "~/components/kits/FormKit";
-import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
+import type { TKeyedFlash } from "~/components/kits/KeyedFlash";
+import { KeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import { useCooldown } from "~/hooks/useCooldown";
 import {
@@ -90,7 +91,7 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }): ReactElement {
       window?.navigator?.clipboard?.writeText(data.recoveryCodes.join("\n"));
       startCooldown();
     }
-  }, [data]);
+  }, [data, startCooldown]);
 
   switch (data.kind) {
     case "existing":
@@ -112,7 +113,7 @@ function Body({ data }: { data: SerializeFrom<typeof loader> }): ReactElement {
         <div className="group relative">
           <ul className="grid grid-cols-2 gap-2 border-t-[3px] border-indigo-900 bg-indigo-50 p-5">
             {data.recoveryCodes.map((code) => (
-              <li>{code}</li>
+              <li key={code}>{code}</li>
             ))}
           </ul>
 

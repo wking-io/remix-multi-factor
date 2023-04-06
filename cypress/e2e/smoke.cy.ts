@@ -17,11 +17,11 @@ describe("smoke tests", () => {
     cy.visitAndCheck("/");
     cy.findByRole("link", { name: /sign up/i }).click();
 
-    cy.findByRole("textbox", { name: /firstName/i }).type(loginForm.first);
-    cy.findByRole("textbox", { name: /lastName/i }).type(loginForm.last);
+    cy.findByRole("textbox", { name: /first name/i }).type(loginForm.first);
+    cy.findByRole("textbox", { name: /last name/i }).type(loginForm.last);
     cy.findByRole("textbox", { name: /email/i }).type(loginForm.email);
-    cy.findByRole("textbox", { name: /email/i }).type(loginForm.email);
-    cy.findByLabelText(/password/i).type(loginForm.password);
+    cy.findByLabelText(/^password$/i).type(loginForm.password);
+    cy.findByLabelText(/confirm password/i).type(loginForm.password);
     cy.findByRole("button", { name: /create account/i }).click();
   });
 });

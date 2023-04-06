@@ -1,10 +1,11 @@
 import { Popover, Transition } from "@headlessui/react";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { useActionData, useLoaderData, useNavigation } from "@remix-run/react";
-import {
+import type {
   ActionArgs,
+  LoaderArgs} from "@remix-run/server-runtime";
+import {
   json,
-  LoaderArgs,
   redirect,
 } from "@remix-run/server-runtime";
 import addMinutes from "date-fns/addMinutes";
@@ -13,7 +14,8 @@ import QR from "qrcode";
 import { Fragment } from "react";
 import Button from "~/components/kits/Button";
 import Form, { TOTPCodeInput } from "~/components/kits/FormKit";
-import { KeyedFlash, TKeyedFlash } from "~/components/kits/KeyedFlash";
+import type { TKeyedFlash } from "~/components/kits/KeyedFlash";
+import { KeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import { saveTOTP } from "~/models/user.server";
 import {

@@ -1,4 +1,4 @@
-import {
+import type {
   Prisma,
   RecoveryCode as RecoveryCodeSchema,
   User,

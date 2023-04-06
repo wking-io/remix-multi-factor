@@ -1,10 +1,11 @@
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { useLoaderData } from "@remix-run/react";
-import { ActionArgs, json, LoaderArgs } from "@remix-run/server-runtime";
+import type { ActionArgs, LoaderArgs } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { AuthIllo, ProfileIllo, TimeZoneIllo } from "~/components/illos";
 import Button from "~/components/kits/Button";
 import Form, { Input, Label } from "~/components/kits/FormKit";
-import { TKeyedFlash } from "~/components/kits/KeyedFlash";
+import type { TKeyedFlash } from "~/components/kits/KeyedFlash";
 import Panel, { PanelBody } from "~/components/kits/Panel";
 import Container from "~/components/layout/Container";
 import { requireUserSession } from "~/services/auth.server";

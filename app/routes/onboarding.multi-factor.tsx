@@ -1,55 +1,6 @@
-import { AndriodIcon, ChromeIcon, IOSIcon } from "~/components/icons";
 import { AuthIllo } from "~/components/illos";
 import Button from "~/components/kits/Button";
 import Panel, { PanelBody } from "~/components/kits/Panel";
-
-const apps = [
-  {
-    name: "Authy by Twillio",
-    links: [
-      {
-        description: "iOS app",
-        icon: IOSIcon,
-        href: "https://itunes.apple.com/us/app/authy/id494168017",
-      },
-      {
-        description: "Andriod App",
-        icon: AndriodIcon,
-        href: "https://play.google.com/store/apps/details?id=com.authy.authy",
-      },
-      {
-        description: "Chrome app",
-        icon: ChromeIcon,
-        href: "https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=en",
-      },
-    ],
-  },
-  {
-    name: "Google Authenticator",
-    links: [
-      {
-        description: "iOS app",
-        icon: IOSIcon,
-        href: "https://apps.apple.com/app/google-authenticator/id388497605",
-      },
-      {
-        description: "Andriod App",
-        icon: AndriodIcon,
-        href: "https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2",
-      },
-    ],
-  },
-  {
-    name: "Authenticator",
-    links: [
-      {
-        description: "iOS app",
-        icon: IOSIcon,
-        href: "https://itunes.apple.com/us/app/authenticator/id766157276",
-      },
-    ],
-  },
-];
 
 export default function OnboardingMultiFactor() {
   return (

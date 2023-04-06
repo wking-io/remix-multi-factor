@@ -3,14 +3,10 @@ import { createCookie, redirect } from "@remix-run/node";
 import { Authenticator } from "remix-auth";
 import { FormStrategy } from "remix-auth-form";
 import { z } from "zod";
-import {
-  getUserById,
-  User,
-  VerifyLogin,
-  verifyLogin,
-} from "~/models/user.server";
+import type { User } from "~/models/user.server";
+import { getUserById, VerifyLogin, verifyLogin } from "~/models/user.server";
 import { getSession, sessionStore } from "~/services/session.server";
-import { UserSession } from "~/types";
+import type { UserSession } from "~/types";
 import { getEnvOrThrow } from "~/utils/env";
 
 const USER_SESSION_KEY = "userId";

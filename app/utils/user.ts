@@ -1,4 +1,4 @@
-import { User } from "~/models/user.server";
+import type { User } from "~/models/user.server";
 import { useRootLoaderData } from "~/root";
 
 export function useOptionalUser(): User | null {

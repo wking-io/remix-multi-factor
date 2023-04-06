@@ -1,8 +1,9 @@
 import type { FormProps as RFormProps } from "@remix-run/react";
-import {
+import type {
   ChangeEvent,
   ComponentPropsWithRef,
-  KeyboardEvent,
+  KeyboardEvent} from "react";
+import {
   useEffect,
   useRef,
 } from "react";

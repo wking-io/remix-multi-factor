@@ -4,7 +4,7 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
-import {
+import type {
   ComponentPropsWithoutRef,
   FC,
   PropsWithChildren,
